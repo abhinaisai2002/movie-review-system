@@ -1,5 +1,5 @@
 {
-  "name": "movie-review-system",
+  "name": "movie_review_system",
   "scripts": {
     "anchor": "cd anchor && anchor",
     "anchor-build": "cd anchor && anchor build",

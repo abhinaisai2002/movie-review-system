@@ -1,0 +1,442 @@
+{
+  "address": "3F4fsF8VBR2sqWMPLLwAuL9ACxwt8QM8HZJdGm9BVJMy",
+  "metadata": {
+    "name": "movie_review_system",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "create_movie",
+      "discriminator": [
+        16,
+        217,
+        163,
+        168,
+        229,
+        18,
+        135,
+        254
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "movie_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  111,
+                  118,
+                  105,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "movie"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "movie",
+          "type": "string"
+        },
+        {
+          "name": "director",
+          "type": "string"
+        },
+        {
+          "name": "hero",
+          "type": "string"
+        },
+        {
+          "name": "release_year",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "create_review",
+      "discriminator": [
+        69,
+        237,
+        87,
+        43,
+        238,
+        125,
+        40,
+        1
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "movie_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  111,
+                  118,
+                  105,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "movie_account.movie",
+                "account": "MovieAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "movie_review",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  118,
+                  105,
+                  101,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "movie_account"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "movie_rating",
+          "type": "u8"
+        },
+        {
+          "name": "review_comment",
+          "type": "string"
+        },
+        {
+          "name": "reviewer_name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "delete_movie_review",
+      "discriminator": [
+        145,
+        87,
+        218,
+        149,
+        170,
+        123,
+        217,
+        101
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "movie_review",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  118,
+                  105,
+                  101,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "movie_account"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "movie_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  111,
+                  118,
+                  105,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "movie_account.movie",
+                "account": "MovieAccount"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_review",
+      "discriminator": [
+        254,
+        84,
+        60,
+        221,
+        68,
+        163,
+        94,
+        29
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "movie_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  111,
+                  118,
+                  105,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "movie_account.movie",
+                "account": "MovieAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "movie_review",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  118,
+                  105,
+                  101,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "movie_account"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "movie_rating",
+          "type": "u8"
+        },
+        {
+          "name": "review_comment",
+          "type": "string"
+        },
+        {
+          "name": "reviewer_name",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "MovieAccount",
+      "discriminator": [
+        16,
+        227,
+        16,
+        231,
+        200,
+        106,
+        89,
+        6
+      ]
+    },
+    {
+      "name": "MovieReview",
+      "discriminator": [
+        215,
+        156,
+        48,
+        235,
+        255,
+        205,
+        137,
+        94
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidUserToCreateMovie",
+      "msg": "Invalid user to create movie, only admin can create movie"
+    },
+    {
+      "code": 6001,
+      "name": "MovieReviewAccountAlreadyExists",
+      "msg": "Movie review account already exists"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidMovie",
+      "msg": "Invalid Movie, Movie does not exist"
+    },
+    {
+      "code": 6003,
+      "name": "ReviewCommentTooLong",
+      "msg": "Review comment is too long"
+    },
+    {
+      "code": 6004,
+      "name": "ReviewerNameTooLong",
+      "msg": "Reviewer name is too long"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidMovieRating",
+      "msg": "Invalid movie rating, must be between 1 and 10"
+    },
+    {
+      "code": 6006,
+      "name": "UnauthorizedReviewUpdate",
+      "msg": "Unauthorized review update attempt"
+    }
+  ],
+  "types": [
+    {
+      "name": "MovieAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "release_year",
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "movie",
+            "type": "string"
+          },
+          {
+            "name": "director",
+            "type": "string"
+          },
+          {
+            "name": "hero",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MovieReview",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "movie_rating",
+            "type": "u8"
+          },
+          {
+            "name": "movie_address",
+            "type": "pubkey"
+          },
+          {
+            "name": "review_comment",
+            "type": "string"
+          },
+          {
+            "name": "reviewer_name",
+            "type": "string"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "reviewer",
+            "type": "pubkey"
+          }
+        ]
+      }
+    }
+  ]
+}

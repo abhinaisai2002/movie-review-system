@@ -1,4 +1,4 @@
-# movie-review-system
+# movie_review_system
 
 This is a Next.js app containing:
 
@@ -14,7 +14,7 @@ This is a Next.js app containing:
 #### Download the template
 
 ```shell
-pnpm create solana-dapp@latest -t gh:solana-foundation/templates/web3js/movie-review-system
+pnpm create solana-dapp@latest -t gh:solana-foundation/templates/web3js/movie_review_system
 ```
 
 #### Install Dependencies
@@ -86,3 +86,14 @@ Build the web app
 ```shell
 pnpm build
 ```
+
+
+Deploying cluster: https://api.devnet.solana.com
+Upgrade authority: /Users/abhinaisai/.config/solana/id.json
+Deploying program "movie_review_system"...
+Program path: /Users/abhinaisai/Documents/sol_main/movie-review-system/anchor/target/deploy/movie_review_system.so...
+Program Id: 3F4fsF8VBR2sqWMPLLwAuL9ACxwt8QM8HZJdGm9BVJMy
+
+Signature: 3UgtQs7u6cnoAzm2x4w94mtspfXi5ktcDjRBFjjkoTixY1ftg8uD8Yk2upzaNVNvEwWudFCW1sYAvZ2oonSK66aH
+
+Deploy success

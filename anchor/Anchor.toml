@@ -1,18 +1,19 @@
 [toolchain]
 package_manager = "yarn"
+anchor_version = "0.31.1"
 
 [features]
 resolution = true
 skip-lint = false
 
 [programs.localnet]
-basic = "JAVuBXeBZqXNtS73azhBDAoYaaAFfo4gWXoZe2e7Jf8H"
+movie_review_system = "JAVuBXeBZqXNtS73azhBDAoYaaAFfo4gWXoZe2e7Jf8H"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

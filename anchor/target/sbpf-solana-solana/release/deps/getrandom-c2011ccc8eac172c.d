@@ -1,0 +1,10 @@
+/Users/abhinaisai/Documents/sol_main/movie-review-system/anchor/target/sbpf-solana-solana/release/deps/libgetrandom-c2011ccc8eac172c.rmeta: /Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/lib.rs /Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/error.rs /Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/util.rs /Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/custom.rs
+
+/Users/abhinaisai/Documents/sol_main/movie-review-system/anchor/target/sbpf-solana-solana/release/deps/libgetrandom-c2011ccc8eac172c.rlib: /Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/lib.rs /Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/error.rs /Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/util.rs /Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/custom.rs
+
+/Users/abhinaisai/Documents/sol_main/movie-review-system/anchor/target/sbpf-solana-solana/release/deps/getrandom-c2011ccc8eac172c.d: /Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/lib.rs /Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/error.rs /Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/util.rs /Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/custom.rs
+
+/Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/lib.rs:
+/Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/error.rs:
+/Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/util.rs:
+/Users/abhinaisai/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/custom.rs:
