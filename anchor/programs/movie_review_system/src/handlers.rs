@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{MintTo, mint_to};
+use anchor_spl::token_interface::{MintTo, mint_to};
 
 use crate::{
     errors::MovieReviewSystemError, CreateMovie, CreateReview, DeleteMovieReview, UpdateReview,
@@ -67,7 +67,7 @@ pub fn create_review_handler(
         let user_vault = &mut _ctx.accounts.user_vault;
         user_vault.bump = _ctx.bumps.user_vault;
         user_vault.user = _ctx.accounts.user.key();
-        user_vault.balance = token_amount;
+        user_vault.balance = 0;
         user_vault.is_initialized = true;
     }
 
@@ -86,6 +86,8 @@ pub fn create_review_handler(
         ),
         token_amount,
     )?;
+
+    _ctx.accounts.user_vault.balance += token_amount;
 
     Ok(())
 }

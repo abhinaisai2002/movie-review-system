@@ -7,15 +7,24 @@ import { Menu, X } from 'lucide-react'
 import { ThemeSelect } from '@/components/theme-select'
 import { ClusterUiSelect } from './cluster/cluster-ui'
 import { WalletButton } from '@/components/solana/solana-provider'
+import { useMovieProgramAccountt } from './movie-review-system/movie-data-access'
+import { useAnchorProvider } from './solana/solana-provider'
+
+
+export const MINT_DECIMALS = 9;
+export const MINT_DECIMAL_FACTOR = 10 ** MINT_DECIMALS;
 
 export function AppHeader({ links = [] }: { links: { label: string; path: string }[] }) {
   const pathname = usePathname()
   const [showMenu, setShowMenu] = useState(false)
+  const provider = useAnchorProvider()
 
   function isActive(path: string) {
     return path === '/' ? pathname === '/' : pathname.startsWith(path)
   }
 
+  const { movieReviewRewards } = useMovieProgramAccountt({ account: provider!.wallet!.publicKey! })
+  console.log(movieReviewRewards.data?.toString())
   return (
     <header className="relative z-50 px-4 py-2 bg-neutral-100 dark:bg-neutral-900 dark:text-neutral-400">
       <div className="mx-auto flex justify-between items-center">
@@ -43,6 +52,19 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
           {showMenu ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
 
+          <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 rounded-lg">
+            <span className="text-sm font-medium text-green-700 dark:text-green-300">Rewards:</span>
+            <span className="text-sm font-bold text-green-800 dark:text-green-200">
+              {movieReviewRewards.isLoading ? (
+                <span className="animate-pulse">Loading...</span>
+              ) : movieReviewRewards.error ? (
+                <span className="text-red-500">Error</span>
+              ) : (
+                `${(Number(movieReviewRewards.data || 0) / MINT_DECIMAL_FACTOR).toFixed(2)} AST`
+              )}
+            </span>
+          </div>
+
         <div className="hidden md:flex items-center gap-4">
           <WalletButton />
           <ClusterUiSelect />
@@ -66,6 +88,18 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
                 ))}
               </ul>
               <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between px-3 py-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                  <span className="text-sm font-medium text-green-700 dark:text-green-300">Rewards:</span>
+                  <span className="text-sm font-bold text-green-800 dark:text-green-200">
+                    {movieReviewRewards.isLoading ? (
+                      <span className="animate-pulse">Loading...</span>
+                    ) : movieReviewRewards.error ? (
+                      <span className="text-red-500">Error</span>
+                    ) : (
+                      `${(Number(movieReviewRewards.data || 0) / 1_000_000).toFixed(2)} AST`
+                    )}
+                  </span>
+                </div>
                 <WalletButton />
                 <ClusterUiSelect />
                 <ThemeSelect />

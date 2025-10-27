@@ -2,8 +2,8 @@
 
 import { getMovieReviewSystemProgramId, getMovieReviewSystemProgram  } from '@project/anchor'
 import { useConnection } from '@solana/wallet-adapter-react'
-import { Cluster, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { Cluster, PublicKey, SystemProgram } from '@solana/web3.js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useCluster } from '../cluster/cluster-data-access'
 import { useAnchorProvider } from '../solana/solana-provider'
@@ -23,6 +23,8 @@ export function useMovieProgram () {
   const provider = useAnchorProvider()
   const programId = useMemo(() => getMovieReviewSystemProgramId(cluster.network as Cluster), [cluster])
   const program = useMemo(() => getMovieReviewSystemProgram(provider, programId), [provider, programId])
+
+  const client = useQueryClient()
 
   const accounts = useQuery({
     queryKey: ['movies', 'all', { cluster }],
@@ -78,31 +80,44 @@ export function useMovieProgram () {
       
       const userVaultPDA = PublicKey.findProgramAddressSync([Buffer.from('user_vault'), provider.wallet!.publicKey!.toBuffer()], programId)[0];
       const astTokenAta = getAssociatedTokenAddressSync(astMint, userVaultPDA, true, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
+      
+      // Calculate the movie review PDA
+      const [movieReviewPDA] = PublicKey.findProgramAddressSync([
+        Buffer.from('review'),
+        movieAccount.publicKey.toBuffer(),
+        provider.wallet!.publicKey!.toBuffer()
+      ], programId);
+
+      const [mintAuthPDA] = PublicKey.findProgramAddressSync(
+        [Buffer.from("mint_auth")],
+        program.programId
+      );
 
       return program
         .methods
         .createReview(input.movieRating, input.reviewComment, input.reviewerName)
         .accounts({
           user: provider.wallet!.publicKey!,
-          astMint: astMint,
-          tokenProgram: TOKEN_2022_PROGRAM_ID,
           // @ts-expect-error asxsa
           movieAccount: movieAccount.publicKey,
-          mintAuth: astMintAuth,
-          astTokenAta: astTokenAta,
+          movieReview: movieReviewPDA,
           userVault: userVaultPDA,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          astTokenAta: astTokenAta,
+          astMint: astMint,
+          mintAuth: mintAuthPDA,
           systemProgram: SystemProgram.programId,
-          rent: SYSVAR_RENT_PUBKEY
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          tokenProgram: TOKEN_2022_PROGRAM_ID
         }).rpc();
     },
     onSuccess: async (signature) => {
       transactionToast(signature)
       await reviews.refetch()
       await myReviews.refetch()
+      client.invalidateQueries({ queryKey: ['movie-review-rewards'] })
     },
     onError: (error) => {
-      console.log(error);
+      console.error('Failed to create review:', error);
       toast.error('Failed to create review')
     },
   })
@@ -139,6 +154,7 @@ export function useMovieProgram () {
       await myReviews.refetch()
     },
     onError: (error) => {
+      console.error('Failed to update review:', error);
       toast.error('Failed to update review')
     },
   })
@@ -179,6 +195,7 @@ export function useMovieProgram () {
     },
   })
 
+
   return {
     program,
     programId,
@@ -194,7 +211,21 @@ export function useMovieProgram () {
 }
 
 export function useMovieProgramAccountt({ account }: { account: PublicKey }) {
+  const { cluster } = useCluster()
+  const provider = useAnchorProvider()
+  const programId = useMemo(() => getMovieReviewSystemProgramId(cluster.network as Cluster), [cluster])
+  const program = useMemo(() => getMovieReviewSystemProgram(provider, programId), [provider, programId])
+  const movieReviewRewards = useQuery({
+    queryKey: ['movie-review-rewards', account, { cluster }],
+    queryFn: () => {
+      const userVaultPDA = PublicKey.findProgramAddressSync([Buffer.from('user_vault'), provider.wallet!.publicKey!.toBuffer()], programId)[0];
+      return program.account.userVault.fetch(userVaultPDA).then(userVault => {
+        return userVault.balance;
+      });
+    }
+  })
   return {
-    account
+    account,
+    movieReviewRewards
   }
 }
