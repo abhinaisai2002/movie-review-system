@@ -5,20 +5,42 @@ import { useMovieProgram } from "../movie-review-system/movie-data-access"
 import { Skeleton } from "../ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
-import { Film, Star, Calendar, User, Eye } from "lucide-react";
+import { Film, Star, Calendar, User, Eye, Edit, Trash2 } from "lucide-react";
 import { MovieList } from "../movie-review-system/movie-list-ui";
 import { ReviewForm } from "../movie-review-system/review-form-ui";
+import { EditReviewForm } from "../movie-review-system/edit-review-form-ui";
 
 type TabType = 'overview' | 'write-review' | 'view-all-movies' | 'my-reviews';
 
 export function DashboardFeature() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [preselectedMovie, setPreselectedMovie] = useState<string | undefined>(undefined);
+  const [editingReview, setEditingReview] = useState<{
+    review: {
+      publicKey: { toString: () => string };
+      account: {
+        movieRating: number;
+        reviewComment: string;
+        reviewerName: string;
+        movieAddress: { toString: () => string };
+      };
+    };
+    movie: {
+      account: {
+        movie: string;
+        director: string;
+        hero: string;
+        releaseYear: number;
+      };
+    };
+  } | null>(null);
   const {
     accounts,
     reviews,
     myReviews,
-    createReview
+    createReview,
+    updateReview,
+    deleteReview
   } = useMovieProgram();
 
   if(accounts.isLoading || reviews.isLoading || myReviews.isLoading){
@@ -64,6 +86,13 @@ export function DashboardFeature() {
   const userReviews = myReviews.data || [];
   const totalMovies = movies.length;
   const totalReviews = allReviews.length;
+  
+  // Helper function to check if user has already reviewed a specific movie
+  const hasUserReviewedMovie = (moviePublicKey: string) => {
+    return userReviews.some((review: { account: { movieAddress: { toString: () => string } } }) => 
+      review.account.movieAddress.toString() === moviePublicKey
+    );
+  };
   
   // Calculate average rating from all reviews
   const averageRating = allReviews.length > 0 
@@ -219,10 +248,17 @@ export function DashboardFeature() {
                         <span className="text-muted-foreground">
                           {movieReviews.length} review{movieReviews.length !== 1 ? 's' : ''}
                         </span>
-                        <Button variant="outline" size="sm" className="h-8">
-                          <Eye className="h-3 w-3 mr-1" />
-                          View
-                        </Button>
+                        {hasUserReviewedMovie(movie.publicKey.toString()) ? (
+                          <span className="inline-flex items-center rounded-full border border-green-200 bg-green-50 text-green-700 px-2.5 py-0.5 text-xs font-medium gap-1">
+                            <Star className="h-3 w-3 fill-current" />
+                            You reviewed
+                          </span>
+                        ) : (
+                          <Button variant="outline" size="sm" className="h-8">
+                            <Eye className="h-3 w-3 mr-1" />
+                            View
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -348,17 +384,24 @@ export function DashboardFeature() {
                             <span className="text-muted-foreground">
                               {movieReviews.length} review{movieReviews.length !== 1 ? 's' : ''}
                             </span>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="h-8"
-                              onClick={() => {
-                                setPreselectedMovie(movieData.movie);
-                              }}
-                            >
-                              <Star className="h-3 w-3 mr-1" />
-                              Review
-                            </Button>
+                            {hasUserReviewedMovie(movie.publicKey.toString()) ? (
+                              <span className="inline-flex items-center rounded-full border border-green-200 bg-green-50 text-green-700 px-2.5 py-0.5 text-xs font-medium gap-1">
+                                <Star className="h-3 w-3 fill-current" />
+                                You reviewed
+                              </span>
+                            ) : (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="h-8"
+                                onClick={() => {
+                                  setPreselectedMovie(movieData.movie);
+                                }}
+                              >
+                                <Star className="h-3 w-3 mr-1" />
+                                Review
+                              </Button>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
@@ -431,6 +474,35 @@ export function DashboardFeature() {
                           {reviewData.reviewComment || 'No review text provided'}
                         </p>
                       </div>
+                      
+                      <div className="flex gap-2 pt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => movie && setEditingReview({ review, movie })}
+                          className="flex-1"
+                          disabled={!movie}
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this review?')) {
+                              deleteReview.mutate({
+                                reviewPublicKey: review.publicKey.toString()
+                              });
+                            }
+                          }}
+                          disabled={deleteReview.isPending}
+                          className="flex-1"
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          {deleteReview.isPending ? 'Deleting...' : 'Delete'}
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 );
@@ -438,6 +510,26 @@ export function DashboardFeature() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Edit Review Form */}
+      {editingReview && (
+        <EditReviewForm
+          onUpdateReview={(data) => {
+            updateReview.mutate(data);
+            setEditingReview(null);
+          }}
+          onDeleteReview={(data) => {
+            deleteReview.mutate(data);
+            setEditingReview(null);
+          }}
+          isLoading={updateReview.isPending}
+          isDeleting={deleteReview.isPending}
+          review={editingReview.review}
+          movie={editingReview.movie}
+          isOpen={!!editingReview}
+          onClose={() => setEditingReview(null)}
+        />
       )}
     </div>
   )

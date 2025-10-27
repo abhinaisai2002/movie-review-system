@@ -61,8 +61,6 @@ export function useMovieProgram () {
     }
   })
 
-  console.log('myReviews', myReviews.data);
-
   const createReview = useMutation({
     mutationKey: ['review', 'create', { cluster }],
     mutationFn: (input: { movieName: string; movieRating: number; reviewComment: string; reviewerName: string }) => {
@@ -90,6 +88,78 @@ export function useMovieProgram () {
     },
   })
 
+  const updateReview = useMutation({
+    mutationKey: ['review', 'update', { cluster }],
+    mutationFn: (input: { reviewPublicKey: string; movieRating: number; reviewComment: string; reviewerName: string }) => {
+      // Find the review account
+      const reviewAccount = myReviews.data?.find(review => review.publicKey.toString() === input.reviewPublicKey);
+      if (!reviewAccount) {
+        throw new Error('Review not found');
+      }
+      
+      // Find the movie account
+      const movieAccount = accounts.data?.find(movie => 
+        movie.publicKey.toString() === reviewAccount.account.movieAddress.toString()
+      );
+      if (!movieAccount) {
+        throw new Error('Movie not found');
+      }
+      
+      return program
+        .methods
+        .updateReview(input.movieRating, input.reviewComment, input.reviewerName)
+        .accounts({
+          user: provider.wallet!.publicKey!,
+          movieAccount: movieAccount.publicKey,
+          movieReview: new PublicKey(input.reviewPublicKey),
+        } as Record<string, unknown>).rpc();
+    },
+    onSuccess: async (signature) => {
+      transactionToast(signature)
+      await reviews.refetch()
+      await myReviews.refetch()
+    },
+    onError: (error) => {
+      toast.error('Failed to update review')
+    },
+  })
+
+  const deleteReview = useMutation({
+    mutationKey: ['review', 'delete', { cluster }],
+    mutationFn: (input: { reviewPublicKey: string }) => {
+      // Find the review account
+      const reviewAccount = myReviews.data?.find(review => review.publicKey.toString() === input.reviewPublicKey);
+      if (!reviewAccount) {
+        throw new Error('Review not found');
+      }
+      
+      // Find the movie account
+      const movieAccount = accounts.data?.find(movie => 
+        movie.publicKey.toString() === reviewAccount.account.movieAddress.toString()
+      );
+      if (!movieAccount) {
+        throw new Error('Movie not found');
+      }
+      
+      return program
+        .methods
+        .deleteMovieReview()
+        .accounts({
+          user: provider.wallet!.publicKey!,
+          movieAccount: movieAccount.publicKey,
+          movieReview: new PublicKey(input.reviewPublicKey),
+        } as Record<string, unknown>).rpc();
+    },
+    onSuccess: async (signature) => {
+      transactionToast(signature)
+      await reviews.refetch()
+      await myReviews.refetch()
+    },
+    onError: () => {
+      toast.error('Failed to delete review')
+    },
+  })
+
   return {
     program,
     programId,
@@ -98,7 +168,9 @@ export function useMovieProgram () {
     getProgramAccount,
     initializeMovie,
     myReviews,
-    createReview
+    createReview,
+    updateReview,
+    deleteReview
   }
 }
 
