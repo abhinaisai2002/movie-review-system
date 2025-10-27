@@ -96,4 +96,6 @@ Program Id: 3F4fsF8VBR2sqWMPLLwAuL9ACxwt8QM8HZJdGm9BVJMy
 
 Signature: 3UgtQs7u6cnoAzm2x4w94mtspfXi5ktcDjRBFjjkoTixY1ftg8uD8Yk2upzaNVNvEwWudFCW1sYAvZ2oonSK66aH
 
+const ast_mint_authority = "B74kXBibuxZLajBUknuFgMWxxdNeUYUR5Wh4YmAMB1a8"
+
 Deploy success

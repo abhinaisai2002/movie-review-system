@@ -31,3 +31,12 @@ pub struct MovieReview {
     pub bump: u8,
     pub reviewer: Pubkey,
 }
+
+#[derive(InitSpace)]
+#[account]
+pub struct UserVault {
+    pub bump: u8,
+    pub user: Pubkey,
+    pub balance: u64,
+    pub is_initialized: bool,
+}

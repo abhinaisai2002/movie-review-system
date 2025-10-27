@@ -19,4 +19,6 @@ pub enum MovieReviewSystemError {
     InvalidMovieRating,
     #[msg("Unauthorized review update attempt")]
     UnauthorizedReviewUpdate,
+    #[msg("Invalid mint authority for the AST mint")]
+    InvalidMintAuthority,
 }

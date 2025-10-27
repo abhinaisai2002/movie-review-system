@@ -54,7 +54,7 @@ const mintTx = mintTo(
     mint,
     ata,
     authority,
-    1000000000 * 100, // Amount to mint (in smallest unit, e.g., if decimals=9, this is 1 token)
+    1000000000 * 100000000, // Amount to mint (in smallest unit, e.g., if decimals=9, this is 1 token)
     [],
     {
         commitment: 'confirmed',

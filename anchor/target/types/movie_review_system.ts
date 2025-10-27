@@ -145,8 +145,124 @@ export type MovieReviewSystem = {
           }
         },
         {
+          "name": "userVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "astTokenAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "userVault"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "astMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "astMint",
+          "writable": true
+        },
+        {
+          "name": "mintAuth",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104
+                ]
+              }
+            ]
+          }
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "tokenProgram"
         }
       ],
       "args": [
@@ -344,6 +460,19 @@ export type MovieReviewSystem = {
         137,
         94
       ]
+    },
+    {
+      "name": "userVault",
+      "discriminator": [
+        23,
+        76,
+        96,
+        159,
+        210,
+        10,
+        5,
+        22
+      ]
     }
   ],
   "errors": [
@@ -381,6 +510,11 @@ export type MovieReviewSystem = {
       "code": 6006,
       "name": "unauthorizedReviewUpdate",
       "msg": "Unauthorized review update attempt"
+    },
+    {
+      "code": 6007,
+      "name": "invalidMintAuthority",
+      "msg": "Invalid mint authority for the AST mint"
     }
   ],
   "types": [
@@ -440,6 +574,30 @@ export type MovieReviewSystem = {
           {
             "name": "reviewer",
             "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "userVault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "balance",
+            "type": "u64"
+          },
+          {
+            "name": "isInitialized",
+            "type": "bool"
           }
         ]
       }

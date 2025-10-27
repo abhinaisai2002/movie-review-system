@@ -1,7 +1,11 @@
 use anchor_lang::prelude::*;
+use anchor_spl::{
+    associated_token::*,
+    token_interface::{Mint, TokenAccount, TokenInterface},
+};
 
 pub mod state;
-use crate::state::{MovieAccount, MovieReview};
+use crate::state::{MovieAccount, MovieReview, UserVault};
 
 pub mod errors;
 
@@ -50,6 +54,7 @@ pub mod movie_review_system {
     pub fn delete_movie_review(_ctx: Context<DeleteMovieReview>) -> Result<()> {
         return delete_movie_review_handler(_ctx);
     }
+
 }
 
 #[derive(Accounts)]
@@ -90,7 +95,38 @@ pub struct CreateReview<'info> {
     )]
     pub movie_review: Account<'info, state::MovieReview>,
 
+    #[account(
+        init_if_needed,
+        payer = user,
+        seeds = [b"user_vault", user.key().as_ref()],
+        bump,
+        space = ANCHOR_DISCRIMINATOR_SIZE + UserVault::INIT_SPACE,
+    )]
+    pub user_vault: Account<'info, UserVault>,
+
+    #[account(
+        init_if_needed,
+        payer = user,
+        associated_token::mint = ast_mint,
+        associated_token::authority = user_vault,
+        associated_token::token_program = token_program,
+    )]
+    pub ast_token_ata: InterfaceAccount<'info, TokenAccount>,
+
+    #[account(
+        mut,
+        constraint = ast_mint.mint_authority.unwrap() == mint_auth.key() @ errors::MovieReviewSystemError::InvalidMintAuthority
+    )]
+    pub ast_mint: Box<InterfaceAccount<'info, Mint>>,
+    #[account(
+        seeds = [b"mint_auth"],
+        bump
+    )]
+    /// CHECK: PDA authority for minting
+    pub mint_auth: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub token_program: Interface<'info, TokenInterface>,
 }
 
 #[derive(Accounts)]

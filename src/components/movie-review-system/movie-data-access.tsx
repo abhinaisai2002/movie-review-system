@@ -2,13 +2,19 @@
 
 import { getMovieReviewSystemProgramId, getMovieReviewSystemProgram  } from '@project/anchor'
 import { useConnection } from '@solana/wallet-adapter-react'
-import { Cluster, PublicKey } from '@solana/web3.js'
+import { Cluster, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useCluster } from '../cluster/cluster-data-access'
 import { useAnchorProvider } from '../solana/solana-provider'
 import { useTransactionToast } from '../use-transaction-toast'
 import { toast } from 'sonner'
+import { ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
+
+
+const astMint = new PublicKey("8Jv5UC3tUGXSe1MpPBJpdLAbeniWkP18M3cyYirLZ9Nt");
+const astMintAuth = new PublicKey("B74kXBibuxZLajBUknuFgMWxxdNeUYUR5Wh4YmAMB1a8");
+
 
 export function useMovieProgram () {
   const { connection } = useConnection()
@@ -70,20 +76,33 @@ export function useMovieProgram () {
         throw new Error('Movie not found');
       }
       
+      const userVaultPDA = PublicKey.findProgramAddressSync([Buffer.from('user_vault'), provider.wallet!.publicKey!.toBuffer()], programId)[0];
+      const astTokenAta = getAssociatedTokenAddressSync(astMint, userVaultPDA, true, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
+
       return program
         .methods
         .createReview(input.movieRating, input.reviewComment, input.reviewerName)
         .accounts({
           user: provider.wallet!.publicKey!,
+          astMint: astMint,
+          tokenProgram: TOKEN_2022_PROGRAM_ID,
+          // @ts-expect-error asxsa
           movieAccount: movieAccount.publicKey,
-        } as Record<string, unknown>).rpc();
+          mintAuth: astMintAuth,
+          astTokenAta: astTokenAta,
+          userVault: userVaultPDA,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+          rent: SYSVAR_RENT_PUBKEY
+        }).rpc();
     },
     onSuccess: async (signature) => {
       transactionToast(signature)
       await reviews.refetch()
       await myReviews.refetch()
     },
-    onError: () => {
+    onError: (error) => {
+      console.log(error);
       toast.error('Failed to create review')
     },
   })

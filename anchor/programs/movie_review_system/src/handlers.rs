@@ -1,7 +1,9 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token::{MintTo, mint_to};
 
 use crate::{
-    errors::MovieReviewSystemError, CreateMovie, CreateReview, DeleteMovieReview, UpdateReview, ADMIN_PUBKEY
+    errors::MovieReviewSystemError, CreateMovie, CreateReview, DeleteMovieReview, UpdateReview,
+    ADMIN_PUBKEY,
 };
 
 pub fn create_movie_handler(
@@ -59,6 +61,32 @@ pub fn create_review_handler(
     movie_review.bump = _ctx.bumps.movie_review;
     movie_review.reviewer = _ctx.accounts.user.key();
 
+    let token_amount = 5000_00_000; // 5000 AST with 6 decimals
+
+    if &_ctx.accounts.user_vault.is_initialized == &false {
+        let user_vault = &mut _ctx.accounts.user_vault;
+        user_vault.bump = _ctx.bumps.user_vault;
+        user_vault.user = _ctx.accounts.user.key();
+        user_vault.balance = token_amount;
+        user_vault.is_initialized = true;
+    }
+
+    let mint_authority_seeds: &[&[u8]] = &[b"mint_auth", &[_ctx.bumps.mint_auth]];
+
+
+    mint_to(
+        CpiContext::new_with_signer(
+            _ctx.accounts.token_program.to_account_info(),
+            MintTo {
+                mint: _ctx.accounts.ast_mint.to_account_info(),
+                to: _ctx.accounts.ast_token_ata.to_account_info(),
+                authority: _ctx.accounts.mint_auth.to_account_info(),
+            },
+            &[mint_authority_seeds],
+        ),
+        token_amount,
+    )?;
+
     Ok(())
 }
 
@@ -69,11 +97,11 @@ pub fn update_review_handler(
     reviewer_name: String,
 ) -> Result<()> {
     let movie_review_pda = &_ctx.accounts.movie_review.to_account_info();
-    
+
     if movie_review_pda.lamports() == 0 || movie_review_pda.data_is_empty() {
         return Err(MovieReviewSystemError::MovieReviewAccountAlreadyExists.into());
     }
-    
+
     if review_comment.len() > 200 {
         return Err(MovieReviewSystemError::ReviewCommentTooLong.into());
     }
@@ -83,11 +111,11 @@ pub fn update_review_handler(
     if movie_rating < 1 || movie_rating > 10 {
         return Err(MovieReviewSystemError::InvalidMovieRating.into());
     }
-    
+
     if &_ctx.accounts.movie_review.movie_address.key() != &_ctx.accounts.movie_account.key() {
         return Err(MovieReviewSystemError::UnauthorizedReviewUpdate.into());
     }
-    
+
     let movie_review = &mut _ctx.accounts.movie_review;
 
     movie_review.movie_rating = movie_rating;
@@ -97,8 +125,10 @@ pub fn update_review_handler(
     Ok(())
 }
 
-
 pub fn delete_movie_review_handler(_ctx: Context<DeleteMovieReview>) -> Result<()> {
-        msg!("Deleting movie review account: {}", _ctx.accounts.movie_review.key());
-        Ok(())
-    }
+    msg!(
+        "Deleting movie review account: {}",
+        _ctx.accounts.movie_review.key()
+    );
+    Ok(())
+}
