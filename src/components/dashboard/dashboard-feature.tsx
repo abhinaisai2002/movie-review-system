@@ -5,7 +5,7 @@ import { useMovieProgram } from "../movie-review-system/movie-data-access"
 import { Skeleton } from "../ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
-import { Film, Star, Calendar, User, Eye, Edit, Trash2 } from "lucide-react";
+import { Film, Star, Calendar, User, Eye, Edit, Trash2, ScanQrCode } from "lucide-react";
 import { MovieList } from "../movie-review-system/movie-list-ui";
 import { ReviewForm } from "../movie-review-system/review-form-ui";
 import { EditReviewForm } from "../movie-review-system/edit-review-form-ui";
@@ -390,17 +390,41 @@ export function DashboardFeature() {
                                 You reviewed
                               </span>
                             ) : (
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="h-8"
-                                onClick={() => {
-                                  setPreselectedMovie(movieData.movie);
-                                }}
+                              <div
+                                className="flex items-center gap-2"
                               >
-                                <Star className="h-3 w-3 mr-1" />
-                                Review
-                              </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-8"
+                                  onClick={() => {
+                                    setPreselectedMovie(movieData.movie);
+                                  }}
+                                >
+                                  <Star className="h-3 w-3 mr-1" />
+                                  Review
+                                </Button>
+
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-8"
+                                  onClick={() => {
+                                    const moviePDA = movie.publicKey.toString();
+                                    const actionUrl = `${window.location.origin}/api/movies/submit-review?movie=${moviePDA}&movieName=${movieData.movie}&movieDirector=${movieData.director}&movieHero=${movieData.hero}&movieReleaseYear=${movieData.releaseYear}`;
+
+                                    const dialUrl = `https://dial.to/?action=solana-action:${encodeURIComponent(actionUrl)}`;
+
+                                    window.open(
+                                      dialUrl, 
+                                      '_blank'
+                                    );
+                                  }}
+                                >
+                                  <ScanQrCode className="h-3 w-3 mr-1" />
+                                  QR
+                                </Button>
+                              </div>
                             )}
                           </div>
                         </CardContent>
