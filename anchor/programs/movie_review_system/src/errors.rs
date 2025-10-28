@@ -21,4 +21,6 @@ pub enum MovieReviewSystemError {
     UnauthorizedReviewUpdate,
     #[msg("Invalid mint authority for the AST mint")]
     InvalidMintAuthority,
+    #[msg("Cooling period not yet passed for withdrawal")]
+    CoolingPeriodNotPassed,
 }

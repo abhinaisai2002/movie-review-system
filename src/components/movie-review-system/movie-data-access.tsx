@@ -10,6 +10,7 @@ import { useAnchorProvider } from '../solana/solana-provider'
 import { useTransactionToast } from '../use-transaction-toast'
 import { toast } from 'sonner'
 import { ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
+import { BN } from 'bn.js'
 
 
 const astMint = new PublicKey("8Jv5UC3tUGXSe1MpPBJpdLAbeniWkP18M3cyYirLZ9Nt");
@@ -215,17 +216,78 @@ export function useMovieProgramAccountt({ account }: { account: PublicKey }) {
   const provider = useAnchorProvider()
   const programId = useMemo(() => getMovieReviewSystemProgramId(cluster.network as Cluster), [cluster])
   const program = useMemo(() => getMovieReviewSystemProgram(provider, programId), [provider, programId])
+
+  const transactionToast = useTransactionToast()
+
   const movieReviewRewards = useQuery({
     queryKey: ['movie-review-rewards', account, { cluster }],
     queryFn: () => {
       const userVaultPDA = PublicKey.findProgramAddressSync([Buffer.from('user_vault'), provider.wallet!.publicKey!.toBuffer()], programId)[0];
       return program.account.userVault.fetch(userVaultPDA).then(userVault => {
-        return userVault.balance;
+        return userVault.balance.add(userVault.withdrawableAmount);
       });
     }
   })
+
+  const withdrawableAmount = useQuery({
+    queryKey: ['withdrawable-amount', account, { cluster }],
+    queryFn: () => {
+      const userVaultPDA = PublicKey.findProgramAddressSync([Buffer.from('user_vault'), provider.wallet!.publicKey!.toBuffer()], programId)[0];
+      return program.account.userVault.fetch(userVaultPDA).then(userVault => {
+        let withdraw = userVault.withdrawableAmount || new BN(0);
+        if (Date.now() / 1000 - userVault.lastWithdrawTimestamp.toNumber() >= 300) {
+          withdraw = withdraw.add(userVault.balance);
+        }
+        return withdraw;
+      });
+    }
+  })
+
+  
+
+  const withDrawTokens = useMutation({
+    mutationKey: ['withdraw-tokens', 'account', { cluster }],
+
+    mutationFn: () => {
+      const userVaultPDA = PublicKey.findProgramAddressSync([Buffer.from('user_vault'), provider.wallet!.publicKey!.toBuffer()], programId)[0];
+      const astTokenAta = getAssociatedTokenAddressSync(astMint, userVaultPDA, true, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
+      
+      const [mintAuthPDA] = PublicKey.findProgramAddressSync(
+        [Buffer.from("mint_auth")],
+        program.programId
+      );
+
+      console.log(astTokenAta.toString(), "astTokenAta")
+      
+      return program
+        .methods
+        .withdrawTokens()
+        .accounts({
+          user: provider.wallet!.publicKey!,
+          // @ts-expect-error asxsa
+          userVault: userVaultPDA,
+          astTokenAta: astTokenAta,
+          astMint: astMint,
+          mintAuth: mintAuthPDA,
+          systemProgram: SystemProgram.programId,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          tokenProgram: TOKEN_2022_PROGRAM_ID
+        }).rpc();
+    },
+    onSuccess: async (signature) => {
+      transactionToast(signature)
+      await movieReviewRewards.refetch()
+    },
+    onError: (error) => {
+      console.error('Failed to withdraw tokens:', error);
+      toast.error('Failed to withdraw tokens')
+    },
+  })
+
   return {
     account,
-    movieReviewRewards
+    movieReviewRewards,
+    withdrawableAmount,
+    withDrawTokens
   }
 }

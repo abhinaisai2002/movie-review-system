@@ -10,7 +10,7 @@ use crate::state::{MovieAccount, MovieReview, UserVault};
 pub mod errors;
 
 pub mod handlers;
-use crate::handlers::{create_movie_handler, create_review_handler, update_review_handler, delete_movie_review_handler};
+use crate::handlers::{create_movie_handler, create_review_handler, update_review_handler, delete_movie_review_handler, withdraw_tokens_handler};
 
 declare_id!("3F4fsF8VBR2sqWMPLLwAuL9ACxwt8QM8HZJdGm9BVJMy");
 
@@ -53,6 +53,10 @@ pub mod movie_review_system {
 
     pub fn delete_movie_review(_ctx: Context<DeleteMovieReview>) -> Result<()> {
         return delete_movie_review_handler(_ctx);
+    }
+    
+    pub fn withdraw_tokens(_ctx: Context<WithdrawTokens>) -> Result<()> {
+        return withdraw_tokens_handler(_ctx);
     }
 
 }
@@ -166,4 +170,52 @@ pub struct DeleteMovieReview<'info> {
         bump = movie_account.bump,
     )]
     pub movie_account: Account<'info, MovieAccount>,
+}
+
+#[derive(Accounts)]
+pub struct WithdrawTokens<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"user_vault", user.key().as_ref()],
+        bump = user_vault.bump,
+        constraint = user_vault.user == user.key() @ errors::MovieReviewSystemError::InvalidUserToCreateMovie,
+    )]
+    pub user_vault: Account<'info, UserVault>,
+
+    #[account(
+        init_if_needed,
+        payer = user,
+        associated_token::mint = ast_mint,
+        associated_token::authority = user_vault,
+        associated_token::token_program = token_program,
+    )]
+    pub ast_token_ata: InterfaceAccount<'info, TokenAccount>,
+
+    #[account(
+        init_if_needed,
+        payer = user,
+        associated_token::mint = ast_mint,
+        associated_token::authority = user,
+        associated_token::token_program = token_program,
+    )]
+    pub user_ata: InterfaceAccount<'info, TokenAccount>,
+
+    #[account(
+        mut,
+        constraint = ast_mint.mint_authority.unwrap() == mint_auth.key() @ errors::MovieReviewSystemError::InvalidMintAuthority
+    )]
+    pub ast_mint: Box<InterfaceAccount<'info, Mint>>,
+    #[account(
+        seeds = [b"mint_auth"],
+        bump
+    )]
+    /// CHECK: PDA authority for minting
+    pub mint_auth: UncheckedAccount<'info>,
+    pub system_program: Program<'info, System>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub token_program: Interface<'info, TokenInterface>,
+
 }

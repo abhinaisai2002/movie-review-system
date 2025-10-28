@@ -46,7 +46,7 @@ const mint = new PublicKey("8Jv5UC3tUGXSe1MpPBJpdLAbeniWkP18M3cyYirLZ9Nt");
 //     TOKEN_2022_PROGRAM_ID,
 // )
 
-const ata = new PublicKey("FKkomGgnqUat3WDMtXiquevPZuV9TLnkn6nyqRHXM4H7");
+const ata = new PublicKey("5v3N1YJAEkR7KicYiyqivLSXDLTBq4dxDfF4WRD6z42Y");
 
 const mintTx = mintTo(
     connection,
@@ -54,7 +54,7 @@ const mintTx = mintTo(
     mint,
     ata,
     authority,
-    1000000000 * 100000000, // Amount to mint (in smallest unit, e.g., if decimals=9, this is 1 token)
+    1000000000 * 10, // Amount to mint (in smallest unit, e.g., if decimals=9, this is 1 token)
     [],
     {
         commitment: 'confirmed',

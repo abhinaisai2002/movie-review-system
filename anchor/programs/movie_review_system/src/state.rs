@@ -39,4 +39,6 @@ pub struct UserVault {
     pub user: Pubkey,
     pub balance: u64,
     pub is_initialized: bool,
+    pub last_withdraw_timestamp: i64,
+    pub withdrawable_amount: u64,
 }

@@ -9,6 +9,7 @@ import { ClusterUiSelect } from './cluster/cluster-ui'
 import { WalletButton } from '@/components/solana/solana-provider'
 import { useMovieProgramAccountt } from './movie-review-system/movie-data-access'
 import { useAnchorProvider } from './solana/solana-provider'
+import { RewardsModal } from './movie-review-system/rewards-modal'
 
 
 export const MINT_DECIMALS = 9;
@@ -52,18 +53,20 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
           {showMenu ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
 
-          <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 rounded-lg">
-            <span className="text-sm font-medium text-green-700 dark:text-green-300">Rewards:</span>
-            <span className="text-sm font-bold text-green-800 dark:text-green-200">
-              {movieReviewRewards.isLoading ? (
-                <span className="animate-pulse">Loading...</span>
-              ) : movieReviewRewards.error ? (
-                <span className="text-red-500">Error</span>
-              ) : (
-                `${(Number(movieReviewRewards.data || 0) / MINT_DECIMAL_FACTOR).toFixed(2)} AST`
-              )}
-            </span>
-          </div>
+          <RewardsModal>
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 cursor-pointer transition-colors">
+              <span className="text-sm font-medium text-green-700 dark:text-green-300">Rewards:</span>
+              <span className="text-sm font-bold text-green-800 dark:text-green-200">
+                {movieReviewRewards.isLoading ? (
+                  <span className="animate-pulse">Loading...</span>
+                ) : movieReviewRewards.error ? (
+                  <span className="text-red-500">Error</span>
+                ) : (
+                  `${(Number(movieReviewRewards.data || 0) / MINT_DECIMAL_FACTOR).toFixed(2)} AST`
+                )}
+              </span>
+            </div>
+          </RewardsModal>
 
         <div className="hidden md:flex items-center gap-4">
           <WalletButton />
@@ -88,18 +91,20 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
                 ))}
               </ul>
               <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between px-3 py-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                  <span className="text-sm font-medium text-green-700 dark:text-green-300">Rewards:</span>
-                  <span className="text-sm font-bold text-green-800 dark:text-green-200">
-                    {movieReviewRewards.isLoading ? (
-                      <span className="animate-pulse">Loading...</span>
-                    ) : movieReviewRewards.error ? (
-                      <span className="text-red-500">Error</span>
-                    ) : (
-                      `${(Number(movieReviewRewards.data || 0) / 1_000_000).toFixed(2)} AST`
-                    )}
-                  </span>
-                </div>
+                <RewardsModal>
+                  <div className="flex items-center justify-between px-3 py-2 bg-green-100 dark:bg-green-900/30 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 cursor-pointer transition-colors">
+                    <span className="text-sm font-medium text-green-700 dark:text-green-300">Rewards:</span>
+                    <span className="text-sm font-bold text-green-800 dark:text-green-200">
+                      {movieReviewRewards.isLoading ? (
+                        <span className="animate-pulse">Loading...</span>
+                      ) : movieReviewRewards.error ? (
+                        <span className="text-red-500">Error</span>
+                      ) : (
+                        `${(Number(movieReviewRewards.data || 0) / MINT_DECIMAL_FACTOR).toFixed(2)} AST`
+                      )}
+                    </span>
+                  </div>
+                </RewardsModal>
                 <WalletButton />
                 <ClusterUiSelect />
                 <ThemeSelect />
